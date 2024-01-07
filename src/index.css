@@ -1,0 +1,24 @@
+
+@import "/node_modules/primeflex/primeflex.css";
+
+*{
+ 
+  margin: 0px;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+ 
+}
+
+.lightBackdrop {
+  background-color: rgba(255, 255, 255, 0.5); /* Define your desired color and opacity */
+}
+
+.toast-message {
+  background:black;
+  color: #fff;
+  font-size: 20px;
+  width: 30vw;
+  padding: 20px 20px;
+}
+
+
