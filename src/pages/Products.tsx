@@ -51,8 +51,10 @@ const Products = () => {
         <Box
           sx={{
             display: "flex",
+            flexDirection: { xs: 'column', sm: 'row' },
+            
             gap: "2rem",
-            paddingX: "175px",
+            paddingX: {xs:'20px' ,sm:"175px"},
             paddingTop: "64px",
             bgcolor: `${darkMode ? "#040D12" : "white"} `,
             color: `${darkMode ? "white" : "black"}`,
@@ -61,11 +63,12 @@ const Products = () => {
           {" "}
           <Box position="relative">
             <Stack
-              style={{
+              
+              sx={{
                 position: "sticky",
                 top: "0",
                 zIndex: "1",
-                width: "250px",
+                width: {xs:'350px',sm:"250px"},
                 padding: "1rem",
                 backgroundColor: `${darkMode ? "black" : "white"} `,
                 color: `${darkMode ? "white" : "black"}`,
@@ -78,8 +81,8 @@ const Products = () => {
             sx={{
               display: "flex",
               alignItems: "center",
-              justifyContent: "flex-start",
-              width: "1170px",
+              justifyContent: {xs:'center',sm: "flex-start"},
+              width: {sm: "1170px"},
               flexDirection: "column",
               paddingTop: "1rem",
             }}
@@ -113,13 +116,14 @@ const Products = () => {
                 } products`}</Typography>
               </Box>
               <Box
-                sx={{ width: "465px", paddingTop: "12px", fontWeight: "bold" }}
+                sx={{ width: "465px", paddingTop: "12px", fontWeight: "bold" , display:{xs:"none",sm:'block'} }}
               >
                 <hr />
               </Box>
               <Box
                 sx={{
                   display: "flex",
+                  flexDirection:{xs:'column',sm:'row'},
                   gap: "10px",
                   alignItems: "center",
                 }}

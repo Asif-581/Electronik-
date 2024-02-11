@@ -42,11 +42,11 @@ const CartList = () => {
       <Box
         sx={{
           marginTop: "50px",
-          marginX: "150px",
+          marginX: {xs:'20px',sm:"150px"},
           display: "flex",
           flexDirection: "column",
           gap: "30px",
-          width: "700px",
+          width: { xs:'320px',sm:"700px"},
         }}
       >
         
@@ -55,96 +55,90 @@ const CartList = () => {
             const { quantity, products, id, product_id, color } = cartItem;
 
             return (
-              <>
-               
-                  <Box key={index}>
-                    <Card
-                      sx={{
-                        display: "flex",
-                        gap: "40px",
-                        bgcolor: `${darkMode ? "black" : "white"}`,
-                        color: `${darkMode ? "white" : "black"}`,
-                      }}
-                    >
-                      <Link to={`/products/${product_id}`}>
-                        <CardMedia
-                          component="img"
-                          sx={{ width: 151, height: 150 }}
-                          image={products?.image}
-                          alt={products?.name}
-                        />
-                      </Link>
-                      <Box sx={{ display: "flex", flexDirection: "column" }}>
-                        <CardContent sx={{ padding: "6px" }}>
-                          <Typography component="div" variant="h6">
-                            {products?.name}
-                          </Typography>
-                          <Typography
-                            variant="subtitle1"
-                            component="div"
-                            sx={{ color: `${darkMode ? "white" : "black"}` }}
-                          >
-                            <span>Color</span> : {color}
-                          </Typography>
-                          <Typography>
-                            {formatPrice(products?.price)}
-                          </Typography>
-                        </CardContent>
-                        <Box
-                          sx={{ display: "flex", gap: "20px", marginX: "5px" }}
-                        >
-                          <AmountButton cartId={id} product_id={product_id} />
-                          <Button
-                            disableRipple={true}
-                            onClick={() => handleClickOpen(id)}
-                          >
-                            Remove
-                          </Button>
-                        </Box>
-                      </Box>
-                    </Card>
-                    <Dialog
-                      open={open}
-                      onClose={handleClose}
-                      BackdropProps={{
-                        style: {
-                          backgroundColor: "rgba(0.9, 0.9, 0.9, 0.2)", // Adjust opacity and color
-                        },
-                      }}
-                    >
-                      <DialogTitle id="alert-dialog-title">
-                        {"Remove item"}
-                      </DialogTitle>
-                      <DialogContent>
-                        <DialogContentText id="alert-dialog-description">
-                          Are you sure you want to remove this item?
-                        </DialogContentText>
-                      </DialogContent>
-                      <DialogActions>
-                        <Button
-                          variant="outlined"
-                          disableRipple={true}
-                          onClick={handleClose}
-                        >
-                          CANCEL
-                        </Button>
-                        <Button
-                          disableRipple={true}
-                          variant="contained"
-                          sx={{ boxShadow: "none" }}
-                          onClick={async () => {
-                            await dispatch(removeCartItemAsync(CartId));
-                            dispatch(getCartItemAsync(user.id));
-                            handleClose();
-                          }}
-                        >
-                          REMOVE
-                        </Button>
-                      </DialogActions>
-                    </Dialog>
+              <Box key={index}>
+                <Card
+                  sx={{
+                    display: "flex",
+                    gap: { xs:'10px',sm:"40px"},
+                    bgcolor: `${darkMode ? "black" : "white"}`,
+                    color: `${darkMode ? "white" : "black"}`,
+                    width: { xs:'100%', sm: "auto" },
+                    height: { xs:151, sm: "auto" },
+                  }}
+                >
+                  <Link to={`/products/${product_id}`}>
+                    <CardMedia
+                      component="img"
+                      sx={{ width: 151, height: 150 }}
+                      image={products?.image}
+                      alt={products?.name}
+                    />
+                  </Link>
+                  <Box sx={{ display: "flex", flexDirection: "column" }}>
+                    <CardContent sx={{ padding: "6px" }}>
+                      <Typography component="div" variant="h6">
+                        {products?.name}
+                      </Typography>
+                      <Typography
+                        variant="subtitle1"
+                        component="div"
+                        sx={{ color: `${darkMode ? "white" : "black"}` }}
+                      >
+                        <span>Color</span> : {color}
+                      </Typography>
+                      <Typography>{formatPrice(products?.price)}</Typography>
+                    </CardContent>
+                    <Box sx={{ display: "flex", gap: "20px", marginX: "5px" }}>
+                      <AmountButton cartId={id} product_id={product_id} />
+                      <Button
+                        disableRipple={true}
+                        onClick={() => handleClickOpen(id)}
+                      >
+                        Remove
+                      </Button>
+                    </Box>
                   </Box>
-                
-              </>
+                </Card>
+                <Dialog
+                  open={open}
+                  onClose={handleClose}
+                  BackdropProps={{
+                    style: {
+                      backgroundColor: "rgba(0.9, 0.9, 0.9, 0.2)", // Adjust opacity and color
+                    },
+                  }}
+                >
+                  <DialogTitle id="alert-dialog-title">
+                    {"Remove item"}
+                  </DialogTitle>
+                  <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                      Are you sure you want to remove this item?
+                    </DialogContentText>
+                  </DialogContent>
+                  <DialogActions>
+                    <Button
+                      variant="outlined"
+                      disableRipple={true}
+                      onClick={handleClose}
+                    >
+                      CANCEL
+                    </Button>
+                    <Button
+                      disableRipple={true}
+                      variant="contained"
+                      sx={{ boxShadow: "none" }}
+                      onClick={async () => {
+                        await dispatch(removeCartItemAsync(CartId));
+                        dispatch(getCartItemAsync(user.id));
+                        handleClose();
+                      }}
+                    >
+                      REMOVE
+                    </Button>
+                  </DialogActions>
+                </Dialog>
+              </Box>
             );
           })}
       </Box>
@@ -153,3 +147,9 @@ const CartList = () => {
 }
 
 export default CartList
+
+
+
+
+
+

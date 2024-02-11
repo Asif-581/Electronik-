@@ -331,9 +331,9 @@ export default function AdminTable() {
       />
     </React.Fragment>
   );
-console.log(selectedProducts);
+
   return (
-    <div className="ml-8 mr-8">
+    <div className=" responsive-container">
       <Toast ref={toast} />
       <div className="card ">
         <DataTable
@@ -351,7 +351,6 @@ console.log(selectedProducts);
           rowsPerPageOptions={[5, 10, 25]}
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
           currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
-         
           header={header}
         >
           <Column
@@ -487,7 +486,7 @@ console.log(selectedProducts);
               onValueChange={(e) => onPriceChange(e)}
             />
           </div>
-          
+
           <div className="field col">
             <label htmlFor="stock" className="font-bold">
               Stock

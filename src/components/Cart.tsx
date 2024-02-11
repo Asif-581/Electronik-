@@ -52,15 +52,15 @@ const CartPage = () => {
       <Box
         sx={{
           display: "flex",
+          flexDirection: { xs: "column", sm: "row" },
           gap: "30px",
           width: "100%",
           minHeight: "100vh",
-          overflow: "hidden",
+          // overflow: "hidden",
           bgcolor: `${darkMode ? "black" : "white"}`,
           color: `${darkMode ? "white" : "black"}`,
         }}
       >
-        
         <CartList />
         <Box
           sx={{
@@ -100,3 +100,8 @@ const CartPage = () => {
 };
 
 export default CartPage;
+
+
+
+
+

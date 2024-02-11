@@ -26,8 +26,12 @@ const GridView = ({ darkMode }: { darkMode: boolean | undefined }) => {
   }, [dispatch, id]);
 
   return (
-    <Box sx={{ width: "100%", marginY: "32px" }}>
-      <Grid container rowSpacing={4} columnSpacing={5}>
+    <Box sx={{
+      width: "100%",
+      marginY: "32px",
+      
+    }}>
+      <Grid container rowSpacing={3}  columnSpacing={5}>
         {(filteredProducts.length === 0 ? products : filteredProducts).map(
           (product: productType) => (
             <Grid item key={product.id} xs={12} md={4} lg={4}>

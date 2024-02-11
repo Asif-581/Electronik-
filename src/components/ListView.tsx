@@ -1,5 +1,11 @@
 import React from "react";
-import { Box, Button, Skeleton, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Skeleton,
+  Typography,
+  useMediaQuery,
+} from "@mui/material";
 import { useAppDispatch, useAppSelector } from "./../Store/hooks";
 import { getAllProducts } from "../features/product/ProductSlice";
 import { useEffect, useState } from "react";
@@ -14,6 +20,8 @@ const ListView = ({ darkMode }: { darkMode : boolean | undefined}) => {
   const dispatch = useAppDispatch();
   const [img, setImg] = useState("");
   const { id } = useParams();
+
+  const isMobile = useMediaQuery("(max-width:600px)");
 
   useEffect(() => {
     dispatch(getAllProducts(""));
@@ -63,7 +71,12 @@ const ListView = ({ darkMode }: { darkMode : boolean | undefined}) => {
                   />
                 )}
               </Box>
-              <Box sx={{ display: "flex", justifyContent: "center" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: { xs: "flex-start", sm: "center" },
+                }}
+              >
                 <Box
                   sx={{
                     display: "flex",
@@ -71,7 +84,7 @@ const ListView = ({ darkMode }: { darkMode : boolean | undefined}) => {
                     alignItems: "flex-start",
                     flexDirection: "column",
                     gap: "0.6rem",
-                    width: "600px",
+                    width: {xs:'100px', sm: "600px" },
                   }}
                 >
                   {status === STATUS.LOADING ? (
@@ -117,9 +130,12 @@ const ListView = ({ darkMode }: { darkMode : boolean | undefined}) => {
                       <Typography component="p">
                         {formatPrice(product.price!)}
                       </Typography>
-                      <Typography component="p">
-                        {product?.description?.slice(0, 150)}
-                      </Typography>
+                      {isMobile ? null : (
+                        <Typography component="p">
+                          {product?.description?.slice(0, 150)}
+                        </Typography>
+                      )}
+
                       <Link to={`${product.id}`}>
                         <Button
                           variant="contained"

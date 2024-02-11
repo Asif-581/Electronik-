@@ -24,7 +24,7 @@ const About = () => {
             display: { xs: "column", sm: "flex" },
             justifyContent: "center",
             alignItems: "center",
-            height: "500px",
+            height: "auto",
             width: { xs: "350px", sm: "100%", md: "100%" },
             gap: "4rem",
           }}
@@ -33,11 +33,11 @@ const About = () => {
             <img src={aboutImg} alt="aboutImage" width="100%" height="500px" />
           </Box>
 
-          <Box sx={{ width: { xs: "350px", sm: "620px" } }}>
+          <Box sx={{ width: { xs: "350px", sm: "620px" }, marginY : "40px" }}>
             <Typography variant="h3" fontWeight="bold">
               Our Story
             </Typography>
-            <Typography component="p" marginY="40px">
+            <Typography component="p">
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Inventore
               facere earum deleniti atque perspiciatis fugiat, cumque alias
               minima assumenda, quibusdam provident quidem. Assumenda natus
@@ -48,12 +48,7 @@ const About = () => {
               nihil quidem laboriosam asperiores. Sit molestiae sed ipsum iusto
               fugiat, aperiam fugit optio consectetur assumenda aliquid vitae,
               illum perspiciatis nobis hic officia distinctio numquam adipisci
-              necessitatibus. Doloribus, accusamus fugit inventore sed
-              praesentium perspiciatis ipsam asperiores sapiente ad natus quod
-              rem mollitia recusandae dignissimos nihil perferendis? Laboriosam
-              ut voluptatem, incidunt, consectetur quo eius tenetur sit nesciunt
-              quaerat ab a temporibus possimus eum neque quae consequuntur,
-              laudantium iste corporis velit.
+              necessitatibus.
             </Typography>
           </Box>
         </Box>
