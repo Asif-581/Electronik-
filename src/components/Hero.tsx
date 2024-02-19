@@ -41,9 +41,12 @@ const Hero = () => {
           tables to beds, dressers, and cabinets.
         </Typography>
         <Box>
+          <Link to='/products'>
           <Button variant="contained" color="success" size="large">
             Shop Now
           </Button>
+          </Link>
+          
         </Box>
       </Box>
 
