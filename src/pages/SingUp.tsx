@@ -1,10 +1,10 @@
 import React from "react";
+// @ts-ignore
+import Electronik from "../assets/Electronik.png";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { TextField, Button, Box, Divider, Typography } from "@material-ui/core";
-import logo from "../assets/logo.svg";
 import { Link } from "react-router-dom";
-import { supabase } from '../Config/supabase'
 import { useAppDispatch, useAppSelector } from "../Store/hooks";
 import { signUpAsync } from "../features/product/authSlice";
 import { useNavigate } from "react-router-dom";
@@ -20,19 +20,18 @@ const validationSchema = Yup.object().shape({
 const SignUp: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { darkMode } = useAppSelector((store) => store.theme);
+ 
   const initialValues = {
     name: "",
     email: "",
     password: "",
+    
   };
 
   const onSubmit = (values: any) => {
-    // Handle form submission logic here
-    const { email, password,name } = values
-    // userSingup(email, password);
-    dispatch(signUpAsync({ email, password ,name}));
-    navigate('/login');
+    const { email, password, name } = values;
+    dispatch(signUpAsync({ email, password, name }));
+    navigate("/login");
   };
 
   return (
@@ -43,12 +42,11 @@ const SignUp: React.FC = () => {
         justifyContent: "center",
         alignItems: "center",
         flexDirection: "column",
-        backgroundColor: `${darkMode ? "black" : "lightgray"}`,
-        color: `${darkMode ? "white" : "black"}`,
+       
       }}
     >
-      <div style={{ width: "200px" }}>
-        <img src={logo} alt="logo" width="100%" />
+      <div style={{ width: "200px",mixBlendMode:'multiply',marginBottom:'20px' }}>
+        <img src={Electronik} />
       </div>
       <div
         style={{
@@ -58,9 +56,9 @@ const SignUp: React.FC = () => {
           width: "400px",
           padding: "20px",
           backgroundColor: "white",
-         
+
           borderRadius: "10px",
-          boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)", 
+          boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.5)",
         }}
       >
         <Formik

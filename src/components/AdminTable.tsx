@@ -20,6 +20,8 @@ import { Tag } from "primereact/tag";
 import { useAppDispatch, useAppSelector } from "../Store/hooks";
 import {
   deleteProductAsync,
+  fetchCategories,
+  fetchCompanies,
   getAllProducts,
   updateProductAsync,
 } from "../features/product/ProductSlice";
@@ -28,33 +30,47 @@ import { formatPrice } from "../utils/helper";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { Badge } from "primereact/badge";
+import { Dropdown, DropdownChangeEvent } from "primereact/dropdown";
+import { SelectItem } from "primereact/selectitem";
+import { Product } from "../Types/type";
 
-type Product = {
-  id: string | null;
-
-  name: string;
-  company: string;
-  description: string;
-  image: string | undefined;
-  price: number;
-  category: string | null;
-  quantity: number;
-  stock: number;
+type Company = {
+  id: string | undefined;
+  company_name: string | undefined;
 };
+
+type Category = {
+  id: string | undefined;
+  name: string | undefined;
+};
+
+//  type product = {
+//   id?: string;
+//   name?: string;
+//   description?: string;
+//   price?: number;
+//   stock?: number;
+//   image?: string;
+//   categories?: Category | null;
+//   category_id?: string;
+//   company_id?: string;
+//   colors?: string[];
+//   companies?: Company | null;
+//   quantity?:number
+// };
 
 export default function AdminTable() {
   let emptyProduct: Product = {
-    id: null,
+    id: "",
     name: "",
     image: "",
     description: "",
-    category: null,
+    categories: null,
     price: 0,
-    quantity: 0,
-    company: '',
-    stock : 0
+    companies: null,
+    stock: 0,
+    category_id: "",
   };
-
 
   const [productDialog, setProductDialog] = useState<boolean>(false);
   const [deleteProductDialog, setDeleteProductDialog] =
@@ -62,19 +78,43 @@ export default function AdminTable() {
   const [deleteProductsDialog, setDeleteProductsDialog] =
     useState<boolean>(false);
   const [product, setProduct] = useState<Product>(emptyProduct);
-  const [selectedProducts, setSelectedProducts] = useState<productType[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<Product | null>(null);
   const [submitted, setSubmitted] = useState<boolean>(false);
-  const [searchQuery,setSearchQuery] = useState<string>('')
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const toast = useRef<Toast>(null);
-  const dt = useRef<DataTable<productType[]>>(null);
-  const { products} = useAppSelector((store) => store.products);
+  const dt = useRef<DataTable<Product[]>>(null);
+  const { products, categories, companies } = useAppSelector(
+    (store) => store.products
+  );
+
   const dispatch = useAppDispatch();
-  const categories = ["Kitchen", "Bedroom", "Dining", "Living room", "Office"];
+  // const categories = ["Kitchen", "Bedroom", "Dining", "Living room", "Office"];
+  //  const categoryOptions = [
+  //    { label: "Kitchen", value: "Kitchen" },
+  //    { label: "Bedroom", value: "Bedroom" },
+  //    { label: "Dining", value: "Dining" },
+  //    { label: "Living room", value: "Living room" },
+  //    { label: "Office", value: "Office" },
+  //  ];
+
+  const [selectedCompany, setSelectedCompany] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  const categoryOptions = categories.map((category) => {
+    const { name, id } = category;
+    return { name: name, id: id };
+  });
+
+  const companiesOptions = companies.map((company) => {
+    const { company_name, id } = company;
+    return { company_name: company_name, id: id };
+  });
 
   useEffect(() => {
-    dispatch(getAllProducts(searchQuery));
- console.log(searchQuery);
-  }, [searchQuery]);
+    dispatch(getAllProducts());
+    dispatch(fetchCategories());
+    dispatch(fetchCompanies());
+  }, []);
 
   const hideDialog = () => {
     setSubmitted(false);
@@ -92,16 +132,30 @@ export default function AdminTable() {
   const saveProduct = async () => {
     setSubmitted(true);
 
-    await dispatch(
-      updateProductAsync({ productId: product.id, updatedProduct: product })
-    );
-    dispatch(getAllProducts(searchQuery));
-    setProductDialog(false);
-    setProduct(emptyProduct);
+    try {
+      await dispatch(
+        updateProductAsync({
+          productId: product.id!,
+          updatedProduct: {
+            ...product,
+            company: product.companies?.id,
+            category: product.categories?.id,
+          },
+        })
+      );
+      dispatch(getAllProducts());
+      setProductDialog(false);
+      setProduct(emptyProduct);
+    } catch (error) {
+      // Handle any errors that occur during the update process
+      console.error("Error saving product:", error);
+      // Optionally, display an error message to the user
+    }
   };
 
   const editProduct = (product: Product) => {
     setProduct({ ...product });
+
     setProductDialog(true);
   };
 
@@ -111,8 +165,8 @@ export default function AdminTable() {
   };
 
   const deleteProduct = async () => {
-    await dispatch(deleteProductAsync(product?.id));
-    dispatch(getAllProducts(searchQuery));
+    await dispatch(deleteProductAsync(product?.id!));
+    dispatch(getAllProducts());
     setDeleteProductDialog(false);
     setProduct(emptyProduct);
     toast.current?.show({
@@ -125,7 +179,7 @@ export default function AdminTable() {
 
   const deleteSelectedProducts = () => {
     setDeleteProductsDialog(false);
-    setSelectedProducts([]);
+    setSelectedProducts(null);
     toast.current?.show({
       severity: "success",
       summary: "Successful",
@@ -134,12 +188,10 @@ export default function AdminTable() {
     });
   };
 
-  const onCategoryChange = (e: RadioButtonChangeEvent) => {
-    let _product = { ...product };
-
-    _product["category"] = e.value;
-    console.log(e.value);
-    setProduct(_product);
+  const onCategoryChange = (e: DropdownChangeEvent) => {
+    product.categories = e.value;
+    setSelectedCategory(e.value);
+    setProduct(product);
   };
 
   const onInputChange = (
@@ -178,19 +230,15 @@ export default function AdminTable() {
     setProduct(_product);
   };
 
-  const onCompanyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let _product = { ...product };
+  const onCompanyChange = (e: DropdownChangeEvent) => {
+    //let _product = { ...product };
 
-    _product["company"] = e.target.value;
-    console.log(e.target.value);
-    setProduct(_product);
+    product.companies = e.value;
+    setSelectedCompany(e.value);
+    setProduct(product);
   };
 
-  const onPriceChange = (
-    e:
-      | React.ChangeEvent<HTMLTextAreaElement>
-      | React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const onPriceChange = (e: any) => {
     const inputValue = e.target.value;
 
     const newPrice = parseInt(inputValue);
@@ -198,11 +246,8 @@ export default function AdminTable() {
     if (!isNaN(newPrice)) {
       const updatedProduct = { ...product, price: newPrice };
       setProduct(updatedProduct);
-      
     }
   };
-
- 
 
   const imageBodyTemplate = (rowData: productType) => {
     return (
@@ -222,13 +267,20 @@ export default function AdminTable() {
   const statusBodyTemplate = (rowData: productType) => {
     const severity = getSeverity(rowData);
     return (
-      <div style={{display:'flex',gap:'10px',justifyContent:'flex-start',alignItems:'center'}}>
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          justifyContent: "flex-start",
+          alignItems: "center",
+        }}
+      >
         {
           <Tag style={{ backgroundColor: severity?.color, padding: "5px" }}>
             {severity?.status === "instock" ? "INSTOCK" : "OUTOFSTOCK"}
           </Tag>
         }
-        <Badge value={rowData.stock} ></Badge>
+        <Badge value={rowData.stock}></Badge>
       </div>
     );
   };
@@ -277,10 +329,6 @@ export default function AdminTable() {
           onInput={(e) => {
             const target = e.target as HTMLInputElement;
             setSearchQuery(target.value);
-           
-
-            
-            
           }}
         />
       </span>
@@ -411,72 +459,71 @@ export default function AdminTable() {
         footer={productDialogFooter}
         onHide={hideDialog}
       >
-        <div className="field">
-          <label htmlFor="name" className="font-bold">
-            Name
-          </label>
-          <InputText
-            id="name"
-            value={product.name}
-            onChange={(e) => onInputChange(e, "name")}
-            required
-            autoFocus
-            className={classNames({ "p-invalid": submitted && !product.name })}
-          />
-          {submitted && !product.name && (
-            <small className="p-error">Name is required.</small>
-          )}
-        </div>
-
-        <div className="field col">
-          <label htmlFor="company" className="font-bold">
-            Company
-          </label>
-          <InputText
-            id="company"
-            value={product.company}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              onCompanyChange(e)
-            }
-          />
-        </div>
-
-        <div className="field">
-          <label htmlFor="description" className="font-bold">
-            Description
-          </label>
-          <InputTextarea
-            id="description"
-            value={product.description}
-            onChange={(e) => onInputChange(e, "description")}
-            required
-            rows={3}
-            cols={20}
-          />
-        </div>
-
-        <div className="field">
-          <label className="mb-3 font-bold">Category</label>
-          <div className="formgrid grid">
-            {categories.map((category, index) => {
-              return (
-                <div className="field-radiobutton col-6" key={index}>
-                  <RadioButton
-                    inputId="category"
-                    name="category"
-                    value={category}
-                    onChange={onCategoryChange}
-                    checked={product.category === category}
-                  />
-                  <label>{category}</label>
-                </div>
-              );
-            })}
+        <div className="p-grid p-fluid">
+          <div className="p-col-12">
+            <label htmlFor="name" className="font-bold">
+              Name
+            </label>
+            <InputText
+              id="name"
+              value={product.name}
+              onChange={(e) => onInputChange(e, "name")}
+              required
+              autoFocus
+              className={classNames({
+                "p-invalid": submitted && !product.name,
+              })}
+            />
+            {submitted && !product.name && (
+              <small className="p-error">Name is required.</small>
+            )}
           </div>
-        </div>
 
-        <div className="formgrid grid">
-          <div className="field col">
+          <div className="p-col-12">
+            <label className="mb-3 font-bold">
+              {/* Company : {product.company} */}
+            </label>
+            <Dropdown
+              id="company"
+              name="company"
+              optionLabel="company_name"
+              value={product.companies}
+              options={companiesOptions}
+              onChange={onCompanyChange}
+              placeholder="Select Company"
+              className="w-full"
+            />
+          </div>
+
+          <div className="p-col-12">
+            <label htmlFor="description" className="font-bold">
+              Description
+            </label>
+            <InputTextarea
+              id="description"
+              value={product.description}
+              onChange={(e) => onInputChange(e, "description")}
+              required
+              rows={3}
+              cols={20}
+            />
+          </div>
+
+          <div className="p-col-12">
+            <label className="mb-3 font-bold">Category</label>
+            <Dropdown
+              id="category"
+              name="category"
+              optionLabel="name"
+              value={product.categories}
+              options={categoryOptions}
+              onChange={onCategoryChange}
+              placeholder="Select Category"
+              className="w-full"
+            />
+          </div>
+
+          <div className="p-col-12">
             <label htmlFor="price" className="font-bold">
               Price
             </label>
@@ -484,10 +531,11 @@ export default function AdminTable() {
               id="price"
               value={product.price ?? 0}
               onValueChange={(e) => onPriceChange(e)}
+              className="w-full"
             />
           </div>
 
-          <div className="field col">
+          <div className="p-col-12">
             <label htmlFor="stock" className="font-bold">
               Stock
             </label>
@@ -495,9 +543,11 @@ export default function AdminTable() {
               id="stock"
               value={product.stock}
               onValueChange={(e) => onInputNumberChange(e, "stock")}
+              className="w-full"
             />
           </div>
-          <div className="field col">
+
+          <div className="p-col-12">
             <label htmlFor="image" className="font-bold">
               Image
             </label>
@@ -507,6 +557,7 @@ export default function AdminTable() {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 onImageChange(e)
               }
+              className="w-full"
             />
           </div>
         </div>

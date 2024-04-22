@@ -1,18 +1,24 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import {
   TextField,
   Button,
   Typography,
-  Box,
   Divider,
-  CircularProgress,
 } from "@material-ui/core";
-import logo from "../assets/logo.svg";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "./../Store/hooks";
-import { signInAsync } from "../features/product/authSlice";
+import { fetchUserDetails, signInAsync } from "../features/product/authSlice";
+import { toast } from "react-toastify";
+// @ts-ignore
+import Electronik from "../assets/Electronik.png";
+type SignInResponse = {
+  message: string;
+  data: string;
+  success: boolean;
+  error: boolean;
+};
 
 const validationSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Required"),
@@ -22,30 +28,36 @@ const validationSchema = Yup.object().shape({
 });
 
 const Login: React.FC = () => {
-  const { isAuthenticated } = useAppSelector((store) => store.auth);
+  const { isAuthenticated, user } = useAppSelector((store) => store.auth);
   const [authError, setAuthError] = useState<string>("");
-  const { darkMode } = useAppSelector((store) => store.theme);
+
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  // const {fetchUserDetails} = useContext(Context)
   const initialValues = {
     email: "",
     password: "",
   };
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 5000);
-    }
-  }, [isAuthenticated]);
-
   const onSubmit = async (values: any) => {
     const { email, password } = values;
-    try {
-      await dispatch(signInAsync({ email, password }));
-    } catch (error) {
-      console.log(error.message);
-      setAuthError(error.message);
+    const data: any = await dispatch(signInAsync({ email, password }));
+    if (data.success) {
+      toast.success(data.message);
+
+          if (data.token) {
+            sessionStorage.setItem("token", data.token); // Store token in sessionStorage
+            dispatch(fetchUserDetails());
+          }
+
+
+      navigate("/");
+     
+      
+    }
+
+    if (data.error) {
+      toast.error(data.message);
     }
   };
 
@@ -57,12 +69,17 @@ const Login: React.FC = () => {
         justifyContent: "center",
         alignItems: "center",
         flexDirection: "column",
-        backgroundColor: `${darkMode ? "black" : "lightgray"}`,
-        color: `${darkMode ? "white" : "black"}`,
       }}
     >
-      <div style={{ width: "200px" }}>
-        <img src={logo} alt="logo" width="100%" />
+      <div style={{ width: "200px", marginBottom: "20px" }}>
+        <img
+          src={Electronik}
+          alt="logo"
+          width="100%"
+          style={{
+            mixBlendMode: "multiply",
+          }}
+        />
       </div>
       <div
         style={{
@@ -114,7 +131,6 @@ const Login: React.FC = () => {
                 variant="contained"
                 color="primary"
                 size="large"
-                disabled={isAuthenticated}
                 disableRipple
                 style={{
                   position: "relative",
@@ -122,11 +138,7 @@ const Login: React.FC = () => {
                   width: "100%",
                 }}
               >
-                {isAuthenticated ? (
-                  <CircularProgress size={24} color="primary" />
-                ) : (
-                  "Login"
-                )}
+                Login
               </Button>
             </Form>
           )}

@@ -1,63 +1,76 @@
-import React from "react";
-import { Box, Button, Typography } from "@mui/material";
-import { useAppSelector, useAppDispatch } from "./../Store/hooks";
-import heroImage from './../assets/hero-bcg.jpeg'
 
-const Hero = () => {
-  const { darkMode } = useAppSelector((store) => store.theme);
-  
- 
+import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Typography,
+  Button,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
+import { Link } from "react-router-dom";
+
+const Hero: React.FC = () => {
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
+  const heroImages = [
+    "Assests/b1.jpg",
+    "Assests/b4.jpg",
+    "Assests/b3.jpg",
+    "Assests/b2.jpg",
+  ];
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [heroImages]);
+
   return (
     <Box
       sx={{
-        paddingY: { xs: "50px", sm: "50px" },
-        paddingX: { xs: "20px", sm: "100px", lg: "100px" },
-        bgcolor: `${darkMode ? "#040D12" : "white"}`,
-        color: `${darkMode ? "white" : "black"}`,
+        backgroundImage: `url(${heroImages[currentImageIndex]})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        height: isSmallScreen ? "60vh" : "60vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        position: "relative",
+        transition: "background-image 0.5s ease-in-out",
+        marginTop:'20px'
       }}
-      display="flex"
-      justifyContent="space-evenly"
     >
       <Box
         sx={{
-          width: { xs: "100%", sm: "50%" },
-          gap: { xs: "30px", sm: "50px" },
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          padding: theme.spacing(4),
+          borderRadius: theme.shape.borderRadius,
+          color: theme.palette.common.white,
+          textAlign: "center",
+          maxWidth: isSmallScreen ? "90%" : "50%",
         }}
-        display="flex"
-        flexDirection="column"
-        justifyContent="center"
       >
-        <Typography
-          variant="h3"
-          sx={{ fontWeight: "bold", fontSize: { xs: "40px", sm: "50px" } }}
-        >
-          Design your
-          <br /> Comfort Zone
+        <Typography variant="h2" component="h1" gutterBottom>
+          Unleash Your Tech Potential
         </Typography>
-        <Typography fontSize="1.25rem">
-          Welcome to our online furniture store! We offer a wide range of
-          high-quality furniture pieces that are designed to elevate your living
-          space. Our collection includes everything from sofas, chairs, and
-          tables to beds, dressers, and cabinets.
+        <Typography variant="h6" component="p" gutterBottom>
+          Discover the latest electronics and cutting-edge technology at our
+          e-commerce store.
         </Typography>
-        <Box>
-          <Link to='/products'>
-          <Button variant="contained" color="success" size="large">
+        <Link to='/products'>
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{ mt: 2 }}
+            href="/shop"
+          >
             Shop Now
           </Button>
-          </Link>
-          
-        </Box>
-      </Box>
-
-      <Box sx={{ display: { xs: "none", sm: "block" } }}>
-        <img
-          src={heroImage}
-          alt="img"
-          height="550px"
-          width="100%"
-          style={{ borderRadius: "5px" }}
-        />
+        </Link>
       </Box>
     </Box>
   );

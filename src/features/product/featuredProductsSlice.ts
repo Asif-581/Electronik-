@@ -26,7 +26,7 @@ export const getFeaturedProducts = createAsyncThunk<
 >("featuredProducts/fetch", async (_, { rejectWithValue }) => {
   try {
     const response = await api.get(
-      "/rest/v1/products?select=*&order=created_at.desc&featured=eq.true"
+      `/api/products?featured=${true}`
     );
     return formatObjResposeToArray(response.data);
   } catch (error) {

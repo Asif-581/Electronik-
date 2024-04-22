@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import api from "./../../../AxiosInterceptor";
 import { STATUS } from "../../constants/Status";
+import { cartItem } from "../../Types/type";
 
 
 type Product = {
@@ -20,6 +21,7 @@ type CartItem = {
   quantity: number;
   color: string;
   products: Product;
+  totalItemPrice: number;
 };
 
 type Order = {
@@ -28,7 +30,8 @@ type Order = {
   payment_id: string;
   created_at: string;
   orderItem: CartItem[];
-
+  status: string;
+  orderTotal: number;
 };
 
 
@@ -49,15 +52,20 @@ export const getOrderItem = createAsyncThunk(
   async (userId:string) => {
     try {
       const orderDetail = await api.get(
-        `/rest/v1/orders?user_id=eq.${userId}&select=id,address_info,payment_id,created_at,cart(quantity,color,products(name,price,image))&order=created_at.desc`
+        `/api/orders/${userId}`
       );
-    const orders : Order[] =  orderDetail.data.map((order: any) => ({
+    const orders: Order[] = orderDetail.data.data.map((order: any) => ({
       id: order.id,
       address_info: order.address_info,
       payment_id: order.payment_id,
       created_at: order.created_at,
-        orderItem: order.cart,
-      }));
+      orderItem: order.cart.map((c: cartItem) => {
+        c.totalItemPrice = c.quantity! * c.products.price;
+        return c;
+      }),
+      status: order.status,
+      orderTotal: order.cart.reduce((accum:number, curr:cartItem) => curr.totalItemPrice + accum,0),
+    }));
         
       return orders;
         

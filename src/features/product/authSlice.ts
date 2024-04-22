@@ -1,68 +1,93 @@
 // authSlice.ts
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AppThunk } from "./../../Store/store";
-import { supabase } from "../../Config/supabase"; // Initialize your Supabase client
-import { useNavigate } from "react-router-dom";
-import { Session, User } from "@supabase/supabase-js";
+import api from "../../../AxiosInterceptor";
+import { toast } from "react-toastify";
+export const fetchUserDetails = createAsyncThunk<User, void>(
+  "auth/fetchUserDetails",
+  async () => {
+    try {
+      
+      const response = await api.get("/api/user_details");
+      const user: User = {
+        user_id: response.data.data.id,
+        name: response.data.data.name,
+        email: response.data.data.email,
+        role: response.data.data.role,
+      };
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
+type User = {
+  user_id?: string | undefined;
+  name?: string;
+  email?: string;
+  role?: string;
+  status?: string;
+};
 
 interface AuthState {
-  user: User | null; // Update with your user type from Supabase
+  user: User | null;
   isAuthenticated: boolean;
+  status: string;
 }
 
 const initialState: AuthState = {
   user: null,
-  isAuthenticated: localStorage.getItem("authenticated") === "true",
+  isAuthenticated: false,
+  status: "",
 };
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    setUser: (
-      state,
-      action: PayloadAction<{
-        user: User | null;
-        session: Session | null;
-      }>
-    ) => {
-      const { user } = action.payload;
-      console.log(user);
-      state.user = JSON.parse(localStorage.getItem("user")!) as User;
-      state.isAuthenticated = !!user;
+    loginUser(state, action) {
+      state.isAuthenticated = true;
+      state.user = action.payload;
     },
-    clearUser: (state) => {
-      state.user = null;
+    logoutUser(state) {
       state.isAuthenticated = false;
+      state.user = null;
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchUserDetails.pending, (state) => {
+        state.status = "LOADING";
+      })
+      .addCase(fetchUserDetails.fulfilled, (state, action) => {
+        state.user = action.payload;
+        state.isAuthenticated = true;
+        state.status = "IDLE";
+      })
+      .addCase(fetchUserDetails.rejected, (state) => {
+        state.status = "ERROR";
+      });
   },
 });
 
-export const { setUser, clearUser } = authSlice.actions;
+export const { loginUser, logoutUser } = authSlice.actions;
 
 export const signInAsync =
   ({ email, password }: { email: string; password: string }): AppThunk =>
   async (dispatch) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const response = await api.post("/api/signin", {
         email,
         password,
       });
 
-      if (error) {
-        console.error(error);
-        throw new Error(error.message);
-      } else {
-        dispatch(setUser(data));
-        // Store session token in localStorage
-        localStorage.setItem("session_token", data.session.access_token);
-        localStorage.setItem("userName", data.user.user_metadata.first_name);
-        localStorage.setItem("authenticated", data.user ? "true" : "false");
-        localStorage.setItem("user", JSON.stringify(data.user));
-      }
+       const token = response.data.data.token;
+       sessionStorage.setItem("token", token);
+      dispatch(fetchUserDetails());
+      return response.data as any;
     } catch (error: any) {
-      console.error(error.message); // Log the error message
-      throw error;
+      console.error(error.message);
     }
   };
 
@@ -78,16 +103,19 @@ export const signUpAsync =
   }): AppThunk =>
   async (dispatch) => {
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { data } = await api.post(`/api/signup`, {
+        name,
         email,
         password,
-        options: {
-          data: {
-            first_name: name,
-          },
-        },
       });
 
+      if (data.success && data.token) {
+        sessionStorage.setItem("token", data.token);
+      }
+
+      if (data.error) {
+        toast.error(data.message);
+      }
     } catch (error: any) {
       console.error(error.message);
     }
@@ -95,9 +123,9 @@ export const signUpAsync =
 
 export const signOutAsync = (): AppThunk => async (dispatch) => {
   try {
-    await supabase.auth.signOut();
-    dispatch(clearUser());
-    localStorage.removeItem("session_token");
+    const response = await api.get(`/api/logout`);
+        sessionStorage.removeItem("token");
+    return response.data as any;
   } catch (error: any) {
     console.error(error.message);
   }

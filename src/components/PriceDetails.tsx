@@ -15,7 +15,7 @@ import { STATUS } from "../constants/Status";
 
 export default function PriceDetails() {
   const { cart,status, itemQuantity, totalPrice } = useAppSelector((state) => state.cart);
-    const { darkMode } = useAppSelector((store) => store.theme);
+  
   const dispatch = useAppDispatch();
   
   
@@ -37,8 +37,7 @@ export default function PriceDetails() {
             top: "40px",
             padding: "1rem",
             boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.25)",
-            bgcolor: `${darkMode ? "black" : "white"}`,
-            color: `${darkMode ? "white" : "black"}`,
+            
           }}
         >
           <Typography sx={{ fontSize: 20 }} gutterBottom>
@@ -48,15 +47,11 @@ export default function PriceDetails() {
           <Typography sx={{ mt: 1.5 }}>
             Price ( {itemQuantity} items ) : {formatPrice(totalPrice)}
           </Typography>
-          <Typography sx={{ mt: 1.5 }}>Discount : -₹1500</Typography>
           <Divider />
           <Typography sx={{ fontSize: 20, fontWeight: "bold" }} gutterBottom>
             Total Amount : {formatPrice(totalPrice)}
           </Typography>
           <Divider />
-          <Typography sx={{ fontSize: 15 }} gutterBottom>
-            you will save 1500 on this order
-          </Typography>
         </CardContent>
       
     </React.Fragment>

@@ -8,6 +8,8 @@ import authReducer from "../features/product/authSlice";
 import cartReducer from "../features/product/CartSlice"
 import themeReducer from "../features/product/themeSlice";
 import ordersReducer from "../features/product/orderSlice";
+//@ts-ignore
+import cartCountReducer from "../features/product/CartCountSlice";
 export const store = configureStore({
   reducer: {
     featuredProducts: featuredproductsReducer,
@@ -19,6 +21,8 @@ export const store = configureStore({
     cart: cartReducer,
     theme: themeReducer,
     orders: ordersReducer,
+    cartCount: cartCountReducer,
+
   },
 });
 export type RootState = ReturnType<typeof store.getState>;

@@ -5,70 +5,68 @@ import { fetchSingleProduct } from "../features/product/SingleProductSlice";
 import Navigation from "../components/Navigation";
 import { Button, Box, Typography } from "@mui/material";
 import { STATUS } from "../constants/Status";
-import Loading from "../components/Loading";
-import { formatPrice, getCurrentLoggedInUser } from "../utils/helper";
+
+import { formatPrice } from "../utils/helper";
 import DoneIcon from "@mui/icons-material/Done";
-import Rating from "@mui/material/Rating";
-import Stack from "@mui/material/Stack";
+
 import React from "react";
 import Chip from "@mui/material/Chip";
 import Skeleton from "@mui/material/Skeleton";
 import {
   addToCartAsync,
   getCartItemAsync,
-  isProductExistInCart,
 } from "../features/product/CartSlice";
 
 const SingleProduct = () => {
   const dispatch = useAppDispatch();
-  const { singleProduct, status } = useAppSelector(
+  const { singleProduct, status, colors } = useAppSelector(
     (store) => store.singleProduct
   );
-  const user = getCurrentLoggedInUser();
 
   const { id } = useParams();
 
-  const [product] = singleProduct;
+  const { name, description, price, stock, image, categories, companies } =
+    singleProduct;
 
-  const [mainColor, setMainColor] = useState(product?.colors![0]);
-  const [initialColorIndex, setInitialColorIndex] = useState(0);
-
-  const [imageThumbnail, setImageThumbnail] = useState(product?.image || "");
+  // const [imageThumbnail, setImageThumbnail] = useState(product?.image || "");
   const { cart } = useAppSelector((store) => store.cart);
-  const { darkMode } = useAppSelector((store) => store.theme);
+
+  const { user, isAuthenticated } = useAppSelector((store) => store.auth);
 
   useEffect(() => {
     if (id !== undefined) {
       dispatch(fetchSingleProduct(id));
-      dispatch(isProductExistInCart(id));
-      // dispatch(getCartItemAsync(user?.id));
     }
   }, [dispatch, id]);
 
-  if (imageThumbnail === undefined) {
-    setImageThumbnail(product?.image!);
-  }
+  const [initialColorIndex, setInitialColorIndex] = useState(0);
+  // if (imageThumbnail === undefined) {
+  //   setImageThumbnail(product?.image!);
+  // }
+
+  // useEffect(() => {
+  //   if (product && product.image) {
+  //     setImageThumbnail(product.image);
+  //   }
+  // }, [product]);
 
   useEffect(() => {
-    if (product && product.image) {
-      setImageThumbnail(product.image);
+    if (singleProduct?.colors) {
+      setMainColor(singleProduct.colors[initialColorIndex]);
     }
-  }, [product]);
+  }, [singleProduct, initialColorIndex]);
 
-  useEffect(() => {
-    if (product?.colors) {
-      setMainColor(product.colors[initialColorIndex]);
-    }
-  }, [product, initialColorIndex]);
-
+  const [mainColor, setMainColor] = useState(colors![0]);
 
   if (status !== STATUS.LOADING && status === STATUS.ERROR) {
     return <h2>{status}</h2>;
   }
 
+  console.log(cart);
+
   return (
     <>
-      <Navigation title={product?.name} product={product} />
+      <Navigation title={name} product={singleProduct} />
 
       <Box
         paddingY="30px"
@@ -80,8 +78,6 @@ const SingleProduct = () => {
             lg: "50px",
             xl: "60px",
           },
-          bgcolor: `${darkMode ? "black" : "white"}`,
-          color: `${darkMode ? "white" : "black"}`,
         }}
       >
         {status === STATUS.LOADING ? (
@@ -94,7 +90,6 @@ const SingleProduct = () => {
               marginX: "30px",
               paddingX: "10px",
               paddingY: "4px",
-              bgcolor: `${darkMode && "rgba(255, 255, 255, 0.1)"}`,
             }}
           />
         ) : (
@@ -122,9 +117,9 @@ const SingleProduct = () => {
             gap: { xs: "2rem", sm: "3rem", md: "4rem" },
           }}
         >
-          {product && (
+          {singleProduct && (
             <Box display="flex" gap="1rem">
-              <Box
+              {/* <Box
                 sx={{
                   display: { xs: "none", sm: "flex" },
                   flexDirection: "column",
@@ -176,7 +171,7 @@ const SingleProduct = () => {
                       </>
                     );
                   })}
-              </Box>
+              </Box> */}
               <Box
                 sx={{
                   width: { xs: "340px", sm: "552px", lg: "480px" },
@@ -189,17 +184,10 @@ const SingleProduct = () => {
                 }}
               >
                 {status === STATUS.LOADING ? (
-                  <Skeleton
-                    variant="rectangular"
-                    width="100%"
-                    height="100%"
-                    sx={{
-                      bgcolor: `${darkMode && "rgba(255, 255, 255, 0.1)"}`,
-                    }}
-                  />
+                  <Skeleton variant="rectangular" width="100%" height="100%" />
                 ) : (
                   <img
-                    src={imageThumbnail}
+                    src={image}
                     alt="productImage"
                     width="100%"
                     height="100%"
@@ -215,79 +203,37 @@ const SingleProduct = () => {
               gap: { xs: "15px", sm: "15px", md: "15px", lg: "17px" },
               display: "flex",
               flexDirection: "column",
-              width: { xs:'340px',sm: "600px"},
+              width: { xs: "340px", sm: "600px" },
             }}
           >
             {status === STATUS.LOADING ? (
               <>
-                <Skeleton
-                  variant="text"
-                  width="50%"
-                  height={60}
-                  sx={{
-                    bgcolor: `${darkMode && "rgba(255, 255, 255, 0.1)"}`,
-                  }}
-                />
-                <Skeleton
-                  variant="text"
-                  width="80%"
-                  height={30}
-                  sx={{
-                    bgcolor: `${darkMode && "rgba(255, 255, 255, 0.1)"}`,
-                  }}
-                />
-                <Skeleton
-                  variant="text"
-                  width="90%"
-                  height={200}
-                  sx={{
-                    bgcolor: `${darkMode && "rgba(255, 255, 255, 0.1)"}`,
-                  }}
-                />
-                <Skeleton
-                  variant="text"
-                  width="40%"
-                  height={20}
-                  sx={{
-                    bgcolor: `${darkMode && "rgba(255, 255, 255, 0.1)"}`,
-                  }}
-                />
-                <Skeleton
-                  variant="text"
-                  width="95%"
-                  height={20}
-                  sx={{
-                    bgcolor: `${darkMode && "rgba(255, 255, 255, 0.1)"}`,
-                  }}
-                />
-                <Skeleton
-                  variant="text"
-                  width="30%"
-                  height={80}
-                  sx={{
-                    bgcolor: `${darkMode && "rgba(255, 255, 255, 0.1)"}`,
-                  }}
-                />
+                <Skeleton variant="text" width="50%" height={60} />
+                <Skeleton variant="text" width="80%" height={30} />
+                <Skeleton variant="text" width="90%" height={200} />
+                <Skeleton variant="text" width="40%" height={20} />
+                <Skeleton variant="text" width="95%" height={20} />
+                <Skeleton variant="text" width="30%" height={80} />
               </>
             ) : (
               <>
                 <Typography variant="h5" fontWeight="bold">
-                  {product?.name?.toUpperCase()}
+                  {name?.toUpperCase()}
                 </Typography>
 
                 <Typography variant="h6">
                   <span style={{ fontWeight: "bold" }}>Price : </span>
                   <span style={{ color: "crimson" }}>
-                    {formatPrice(product?.price!)}
+                    {formatPrice(price!)}
                   </span>
                 </Typography>
                 <Typography component="p">
                   <span style={{ fontWeight: "bold" }}>Description : </span>
-                  {product?.description}
+                  {description}
                 </Typography>
                 <Typography component="p">
                   <span style={{ fontWeight: "bold" }}>Available</span> :{" "}
-                  {product?.stock! >= 1 ? (
+                  {stock! >= 1 ? (
                     <Chip label="In stock" color="success" />
                   ) : (
                     <Chip label="Out of stock" color="error" />
@@ -296,17 +242,17 @@ const SingleProduct = () => {
 
                 <Typography component="p">
                   <span style={{ fontWeight: "bold" }}>Company</span> :{" "}
-                  {product?.company}
+                  {companies?.company_name}
                 </Typography>
 
                 <Typography component="p">
                   <span style={{ fontWeight: "bold" }}>Category</span> :{" "}
-                  {product?.category}
+                  {categories?.name!}
                 </Typography>
                 <hr />
                 <Typography component="p" display="flex" gap="10px">
                   <span style={{ fontWeight: "bold" }}>Colors</span> :{" "}
-                  {product?.colors?.map((color, index) => {
+                  {colors?.map((color, index) => {
                     return (
                       <div
                         key={color}
@@ -339,33 +285,33 @@ const SingleProduct = () => {
                 </Typography>
 
                 <Link to="/cart">
-                  {cart.some((c) => c?.product_id === product?.id) ? (
+                  {cart.some((c) => c?.product_id === id) ? (
                     <Button
                       variant="contained"
                       color="success"
                       disableRipple={true}
                       onClick={() => {
-                        dispatch(getCartItemAsync(user?.id));
+                        dispatch(getCartItemAsync(user?.user_id!));
                       }}
                     >
                       Go to Cart
                     </Button>
-                  ) : product?.stock! >= 1 ? (
+                  ) : stock! >= 1 ? (
                     <Button
                       variant="contained"
                       color="success"
                       disableRipple={true}
                       onClick={async () => {
-                        const { id } = product;
+                        const { id } = singleProduct;
                         await dispatch(
                           addToCartAsync({
                             product_id: id,
                             quantity: 1,
-                            user_id: user?.id,
+                            user_id: user?.user_id!,
                             color: mainColor,
                           })
                         );
-                        dispatch(getCartItemAsync(user?.id));
+                        dispatch(getCartItemAsync(user?.user_id!));
                       }}
                     >
                       Add to Cart

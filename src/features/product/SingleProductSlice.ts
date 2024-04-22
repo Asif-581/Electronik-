@@ -9,13 +9,15 @@ import api from "./../../../AxiosInterceptor";
 // Define the state type
 type SingleProductState = {
   status: string;
-  singleProduct: productType[];
+  singleProduct: productType;
+  colors: string[];
   
 };
 
 const initialState: SingleProductState = {
   status: STATUS.IDLE,
-  singleProduct: [],
+  singleProduct: {},
+  colors:[]
   
   
 };
@@ -32,8 +34,9 @@ const SingleProductSlice = createSlice({
       })
       .addCase(
         fetchSingleProduct.fulfilled,
-        (state, action: PayloadAction<productType[]>) => {
+        (state, action: PayloadAction<productType>) => {
           state.singleProduct = action.payload;
+          state.colors = action.payload.colors!
           state.status = STATUS.IDLE;
         }
       )
@@ -44,14 +47,14 @@ const SingleProductSlice = createSlice({
 });
 
 // Define the async thunk
-export const fetchSingleProduct = createAsyncThunk<productType[], string>(
+export const fetchSingleProduct = createAsyncThunk<productType, string>(
   "product/fetchSingleProduct",
   async (id: string) => {
     try {
       const response = await api.get(
-        `/rest/v1/products?id=eq.${id}`
+        `/api/products/${id}`
       );
-      return response.data as productType[];
+      return response.data as productType;
     } catch (error) {
       throw error;
     }

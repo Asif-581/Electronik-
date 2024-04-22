@@ -7,23 +7,25 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
-import AmountButton from "../components/AmountButton";
+// import AmountButton from "../components/AmountButton";
 import {
   getCartItemAsync,
   removeCartItemAsync,
 } from "../features/product/CartSlice";
 import { Box, Button,Skeleton,Typography } from '@mui/material';
-import { formatPrice, getCurrentLoggedInUser } from '../utils/helper';
+import { formatPrice } from '../utils/helper';
 import { useAppDispatch, useAppSelector } from '../Store/hooks';
 import { Link } from 'react-router-dom';
 import { STATUS } from '../constants/Status';
+import AmountButton from './AmountButton';
 const CartList = () => {
   const { cart, status } = useAppSelector((store) => store.cart);
-  const { darkMode } = useAppSelector((store) => store.theme);
+  const { user } = useAppSelector((store) => store.auth);
+ 
     const dispatch = useAppDispatch();
     const [open, setOpen] = React.useState(false);
     const [CartId, setCartId] = React.useState("");
-    const user = getCurrentLoggedInUser();
+ 
 
 
   
@@ -36,6 +38,8 @@ const CartList = () => {
         setOpen(false);
       };
 
+
+  
   return (
     <>
       
@@ -52,18 +56,16 @@ const CartList = () => {
         
         {Array.isArray(cart) &&
           cart?.map((cartItem, index) => {
-            const { quantity, products, id, product_id, color } = cartItem;
-
+            const { quantity, products,cart_id, product_id, color } = cartItem;
+         
             return (
               <Box key={index}>
                 <Card
                   sx={{
                     display: "flex",
-                    gap: { xs:'10px',sm:"40px"},
-                    bgcolor: `${darkMode ? "black" : "white"}`,
-                    color: `${darkMode ? "white" : "black"}`,
-                    width: { xs:'100%', sm: "auto" },
-                    height: { xs:151, sm: "auto" },
+                    gap: { xs: "10px", sm: "40px" },
+                    width: { xs: "100%", sm: "auto" },
+                    height: { xs: 151, sm: "auto" },
                   }}
                 >
                   <Link to={`/products/${product_id}`}>
@@ -82,17 +84,22 @@ const CartList = () => {
                       <Typography
                         variant="subtitle1"
                         component="div"
-                        sx={{ color: `${darkMode ? "white" : "black"}` }}
+                       
                       >
                         <span>Color</span> : {color}
                       </Typography>
                       <Typography>{formatPrice(products?.price)}</Typography>
                     </CardContent>
                     <Box sx={{ display: "flex", gap: "20px", marginX: "5px" }}>
-                      <AmountButton cartId={id} product_id={product_id} />
+
+
+                      <AmountButton cartId={cart_id} product_id={product_id} />
+
+
+
                       <Button
                         disableRipple={true}
-                        onClick={() => handleClickOpen(id)}
+                        onClick={() => handleClickOpen(cart_id)}
                       >
                         Remove
                       </Button>
@@ -130,7 +137,7 @@ const CartList = () => {
                       sx={{ boxShadow: "none" }}
                       onClick={async () => {
                         await dispatch(removeCartItemAsync(CartId));
-                        dispatch(getCartItemAsync(user.id));
+                        dispatch(getCartItemAsync(user?.user_id!));
                         handleClose();
                       }}
                     >

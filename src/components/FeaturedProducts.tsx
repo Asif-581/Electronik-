@@ -19,7 +19,7 @@ const FeaturedProducts = () => {
   const { featuredProducts, status } = useAppSelector(
     (store) => store.featuredProducts
   );
-  const { darkMode } = useAppSelector((store) => store.theme);
+ 
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -32,49 +32,50 @@ const FeaturedProducts = () => {
 
   return (
     <>
-      <Box
-        paddingY="80px"
-        bgcolor={`${darkMode ? "#040D12" : "aliceblue"}`}
-        color={`${darkMode ? "white" : "black"}`}
-      >
-        <Typography variant="h4" textAlign="center" fontWeight="bold">
+      <Box paddingY="50px">
+        <Typography
+          variant="h4"
+          align="center"
+          fontWeight="bold"
+          marginBottom="10px"
+        >
           Featured Products
         </Typography>
         <Box
           marginX="auto"
-          marginTop="5px"
-          bgcolor="red"
+          marginBottom="40px"
+          bgcolor="#e53935"
           height="0.25rem"
           width="6rem"
-        ></Box>
+          borderRadius="10px"
+          boxShadow="0 4px 8px rgba(0, 0, 0, 0.2)"
+        />
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-around",
-            paddingX: { xs: "20px", md: "100px" },
+            justifyContent: "space-evenly",
+            paddingX: { xs: "20px", md: "50px" },
             paddingTop: "50px",
-            bgcolor: `${darkMode ? "#040D12" : "aliceblue"}`,
           }}
         >
-          <Grid
-            container
-            columnSpacing={4}
-            rowSpacing={{ xs: 3 }}
-            sx={{ width: "1200px" }}
-          >
+          <Grid container spacing={4}>
             {status === STATUS.LOADING ? (
               <>
                 {featuredProducts?.map((_, index) => (
-                  <Grid xs={12} md={4} key={index}>
-                    <Card sx={{ boxShadow: "none", bgcolor: "aliceblue" }}>
-                      <Skeleton
-                        variant="rectangular"
-                        height={250}
-                        sx={{
-                          bgcolor: `${darkMode && "rgba(255, 255, 255, 0.1)"}`,
-                        }}
-                      />
+                  //@ts-ignore
+                  <Grid item xs={12} md={4} key={index}>
+                    <Card
+                      sx={{
+                        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+                        maxWidth: "350px", // Change this value to make the card smaller
+                        maxHeight: "450px",
+                        marginBottom: "20px",
+                        borderRadius: "10px",
+                        overflow: "hidden",
+                      }}
+                    >
+                      <Skeleton variant="rectangular" height={250} />
                       <CardContent
                         sx={{
                           display: "flex",
@@ -90,56 +91,75 @@ const FeaturedProducts = () => {
                 ))}
               </>
             ) : (
-              featuredProducts?.map((product: productType) => {
-                return (
-                  <Grid xs={12} md={4} key={product?.id}>
-                    <Card sx={{ boxShadow: "none", bgcolor: "aliceblue" }}>
-                      <CardActionArea>
-                        <Link to={`/products/${product?.id}`}>
-                          <CardMedia
-                            component="img"
-                            sx={{
-                              height: { xs: "200px", md: "250px" },
+                featuredProducts?.map((product: productType) => (
+                //@ts-ignore
+                <Grid item xs={12} md={4} key={product?.id}>
+                  <Card
+                    sx={{
+                      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
 
-                              border: { xs: "2px solid red", sm: "none" },
-                            }}
-                            image={product.image}
-                            alt="green iguana"
-                          />
-                        </Link>
-                        <CardContent
+                      maxWidth: "400px",
+                      maxHeight: "500px",
+                      marginBottom: "20px",
+                      borderRadius: "10px",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <CardActionArea>
+                      <Link to={`/products/${product?.id}`}>
+                        <CardMedia
+                          component="img"
                           sx={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            cursor: "default",
+                            height: { xs: "200px", md: "200px" },
+                            border: { xs: "2px solid #e53935", sm: "none" },
+                            transition: "transform 0.3s ease-in-out",
+                            "&:hover": {
+                              transform: "scale(1.05)",
+                            },
                           }}
+                          image={product.image}
+                          alt={product.name}
+                        />
+                      </Link>
+                      <CardContent
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          cursor: "default",
+                        }}
+                      >
+                        <Typography
+                          gutterBottom
+                          variant="h6"
+                          component="div"
+                          textAlign="center"
+                          fontWeight="bold"
                         >
-                          <Typography
-                            gutterBottom
-                            variant="h5"
-                            component="div"
-                            fontSize="1rem"
-                          >
-                            {product.name}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {formatPrice(product.price!)}
-                          </Typography>
-                        </CardContent>
-                      </CardActionArea>
-                    </Card>
-                  </Grid>
-                );
-              })
+                          {product.name}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          fontWeight="bold"
+                        >
+                          {formatPrice(product.price!)}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          textAlign="center"
+                          marginTop="10px"
+                        >
+                          {product.description?.slice(0, 120)}
+                        </Typography>
+                      </CardContent>
+                    </CardActionArea>
+                  </Card>
+                </Grid>
+              ))
             )}
           </Grid>
-        </Box>
-        <Box display="flex" justifyContent="center" marginTop="2.5rem">
-          <Link to="/products">
-            <Button variant="contained" color="success">
-              All Products
-            </Button>
-          </Link>
         </Box>
       </Box>
     </>
@@ -147,3 +167,11 @@ const FeaturedProducts = () => {
 };
 
 export default FeaturedProducts;
+
+
+
+
+
+
+
+

@@ -1,8 +1,7 @@
 import React, { useEffect } from "react";
 import { useAppSelector, useAppDispatch } from "../Store/hooks";
 import Navigation from "../components/Navigation";
-import { Box, Button, TextField, Typography } from "@mui/material";
-import { formatPrice, getCurrentLoggedInUser } from "../utils/helper";
+import { Box, Button } from "@mui/material";
 
 import {
   clearAllCartItems,
@@ -15,21 +14,25 @@ import { Link } from "react-router-dom";
 import CartList from "./CartList";
 import EmptyCart from "./EmptyCart";
 import Modal from "./Modal";
+import { fetchUserDetails } from "../features/product/authSlice";
 
-const CartPage = () => {
+const Cart = () => {
   const { cart, status } = useAppSelector((store) => store.cart);
-  const { isAuthenticated } = useAppSelector((store) => store.auth);
-  const { darkMode } = useAppSelector((store) => store.theme);
+  const { isAuthenticated,user } = useAppSelector((store) => store.auth);
+ 
   const dispatch = useAppDispatch();
-  const user = getCurrentLoggedInUser();
+ const userId = user?.user_id
 
   const getCartItems = async (userId: string) => {
     await dispatch(getCartItemAsync(userId));
   };
 
   useEffect(() => {
-    getCartItems(user?.id);
-  }, []);
+    getCartItems(user?.user_id!);
+    dispatch(fetchUserDetails());
+  }, [userId]);
+
+
 
   if (status === STATUS.LOADING) {
     return (
@@ -38,17 +41,18 @@ const CartPage = () => {
         alignItems="center"
         justifyContent="center"
         height="100vh"
-        bgcolor={darkMode ? "black" : "white"}
+     
       >
         <Loading />
       </Box>
     );
   }
-  if (cart?.length === 0 || isAuthenticated === false) return <EmptyCart />;
+  if (cart?.length === 0 ) return <EmptyCart />;
 
   return (
     <>
-      {cart?.length != 0 && <Navigation title="cart" />}
+      {/* {cart?.length != 0 && <Navigation title="cart" />} */}
+      <Navigation title="cart" />
       <Box
         sx={{
           display: "flex",
@@ -57,8 +61,6 @@ const CartPage = () => {
           width: "100%",
           minHeight: "100vh",
           // overflow: "hidden",
-          bgcolor: `${darkMode ? "black" : "white"}`,
-          color: `${darkMode ? "white" : "black"}`,
         }}
       >
         <CartList />
@@ -72,7 +74,7 @@ const CartPage = () => {
         >
           <PriceDetails />
           <Box sx={{ marginY: "50px", display: "flex", gap: "50px" }}>
-            {isAuthenticated ? (
+            {/* {isAuthenticated ? (
               <Modal />
             ) : (
               <Link to="/login">
@@ -80,14 +82,29 @@ const CartPage = () => {
                   Login
                 </Button>
               </Link>
+            )} */}
+
+            {isAuthenticated === false ? (
+              <Link to="/login">
+                <Button variant="contained" color="success" disableRipple>
+                  Login
+                </Button>
+              </Link>
+            ) : (
+              <>
+                {/* <Button variant="contained" color="success" disableRipple>
+                  Place order
+                </Button> */}
+                <Modal />
+              </>
             )}
 
             <Button
               variant="contained"
               disableRipple
               onClick={async () => {
-                await dispatch(clearAllCartItems(user.id));
-                dispatch(getCartItemAsync(user.id));
+                await dispatch(clearAllCartItems(user?.user_id!));
+                dispatch(getCartItemAsync(userId!));
               }}
             >
               Clear cart
@@ -99,7 +116,7 @@ const CartPage = () => {
   );
 };
 
-export default CartPage;
+export default Cart;
 
 
 

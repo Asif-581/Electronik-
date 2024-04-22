@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { useAppSelector } from "../Store/hooks";
 
 const EmptyCart = () => {
-  const { darkMode } = useAppSelector((store) => store.theme);
+ 
   return (
     <Box
       sx={{
@@ -15,8 +15,6 @@ const EmptyCart = () => {
         justifyContent: "center",
         alignItems: "center",
         gap: "10px",
-        bgcolor: `${darkMode ? "black" : "white"}`,
-        color: `${darkMode ? "white" : "black"}`,
       }}
     >
       <Box sx={{ width: "300px", height: "300px" }}>

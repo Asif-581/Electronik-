@@ -8,7 +8,7 @@ import CloseIcon from "@mui/icons-material/Close"; // Import the Close icon
 
 import AddProduct from "../components/AddProduct";
 
-import AdminTable from "../components/AdminTable"
+import AdminTable from "./../components/AdminTable"
 
 
 const Admin = () => {

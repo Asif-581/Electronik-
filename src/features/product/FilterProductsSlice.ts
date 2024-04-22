@@ -3,11 +3,9 @@ import { productType } from "../../Types/type";
 
 type filter = {
   filteredProducts: productType[];
-  
 };
 const initialState: filter = {
   filteredProducts: [],
- 
 };
 
 const FilterProductsSlice = createSlice({
@@ -44,15 +42,13 @@ const FilterProductsSlice = createSlice({
 
     filterBySearch: (state, action) => {
       const { products, inputValue } = action.payload;
-      if (inputValue.trim() === '') {
+      if (inputValue.trim() === "") {
         state.filteredProducts = products;
-      }
-      else {
+      } else {
         state.filteredProducts = [...products].filter((product: productType) =>
           product?.name!.toLowerCase().includes(inputValue.toLowerCase())
         );
       }
-  
     },
 
     filterByCategories: (
@@ -81,19 +77,20 @@ const FilterProductsSlice = createSlice({
     },
     filterByColor: (state, action) => {
       const { products, color } = action.payload;
-      if (color === 'All') {
-         state.filteredProducts = products;
-      }
-      else {
-         state.filteredProducts = products.filter(
-           (product:productType) => product.colors!.find((productColor:string) => productColor === color) 
-         )
+      if (color === "All") {
+        state.filteredProducts = products;
+      } else {
+        state.filteredProducts = products.filter((product: productType) =>
+          product.colors!.find((productColor: string) => productColor === color)
+        );
       }
     },
     filterByPrice: (state, action) => {
       const { products, value } = action.payload;
-      state.filteredProducts = products.filter((product: productType) => product.price! <= value);
-    }
+      state.filteredProducts = products.filter(
+        (product: productType) => product.price! <= value
+      );
+    },
   },
 });
 export const {
@@ -102,6 +99,6 @@ export const {
   sortProduct,
   filterBySearch,
   filterByColor,
-  filterByPrice
+  filterByPrice,
 } = FilterProductsSlice.actions;
 export default FilterProductsSlice.reducer;

@@ -8,6 +8,7 @@ const CartPage = () => {
   return (
     <>
       <Box sx={{height:'100vh'}}>{isAuthenticated ? <Cart /> : <IsAuthenticated />}</Box>
+  
     </>
   );
 };

@@ -1,57 +1,33 @@
 import AppBar from "@mui/material/AppBar";
+// @ts-ignore
+import Electronik from "../assets/Electronik.png";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import MenuIcon from "@mui/icons-material/Menu";
-import logo from "../assets/logo.svg";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import Badge from "@mui/material/Badge";
 import { Drawer, IconButton, Typography } from "@mui/material";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAppSelector, useAppDispatch } from "./../Store/hooks";
-import { signOutAsync } from "../features/product/authSlice";
+import {
+  fetchUserDetails,
+  logoutUser,
+  signOutAsync,
+} from "../features/product/authSlice";
 import { Button, useMediaQuery } from "@material-ui/core";
 import Avatar from "@mui/material/Avatar";
 import Chip from "@mui/material/Chip";
 import { toggleDarkMode } from "../features/product/themeSlice";
-import DarkModeIcon from "@mui/icons-material/DarkMode";
-import LightModeIcon from "@mui/icons-material/LightMode";
-const links = [
-  {
-    id: 1,
-    text: "Home",
-    url: "/",
-  },
-  {
-    id: 2,
-    text: "About",
-    url: "/about",
-  },
-  {
-    id: 3,
-    text: "Products",
-    url: "/products",
-  },
-  {
-    id: 4,
-    text: "Order",
-    url: "/order",
-  },
-  {
-    id: 5,
-    text: "Admin",
-    url: "/admin",
-  },
-];
-
-
-
+import { toast } from "react-toastify";
+import { getUserCartCount } from "../features/product/CartSlice";
+import { setCartCount, updateCartCount } from "../features/product/CartCountSlice";
 
 const Navbar = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { isAuthenticated, user } = useAppSelector((store) => store.auth);
   const { cart } = useAppSelector((store) => store.cart);
-  const { darkMode } = useAppSelector((store) => store.theme);
+let { count } = useAppSelector((store) => store.cartCount);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const userName = localStorage.getItem("userName");
@@ -62,13 +38,53 @@ const Navbar = () => {
   const isDesktop = useMediaQuery("(min-width:1367px)"); // Adjust as needed
   const is32InchDesktop = useMediaQuery("(min-width:2560px)"); // Adjust as needed
 
+  const links = [
+    {
+      id: 1,
+      text: "Home",
+      url: "/",
+    },
+    // {
+    //   id: 2,
+    //   text: "About",
+    //   url: "/about",
+    // },
+    {
+      id: 3,
+      text: "Shop",
+      url: "/products",
+    },
+    {
+      id: 4,
+      text: "Order",
+      url: "/order",
+    },
+    {
+      id: 5,
+      text: "Contact",
+      url: "/contact",
+    },
+  ];
+
+  if (user && user.role === "admin") {
+    links.push({
+      id: 6,
+      text: "Admin",
+      url: "/admin",
+    });
+  }
+
   const handleLogout = async () => {
-    try {
-      await dispatch(signOutAsync());
-      navigate("/login");
-      localStorage.clear();
-    } catch (error) {
-      console.error(error);
+    const data: any = await dispatch(signOutAsync());
+    if (data.success) {
+      toast.success(data.message);
+      dispatch(logoutUser());
+      dispatch(setCartCount(0));
+
+    }
+
+    if (data.error) {
+      toast.error(data.message);
     }
   };
 
@@ -78,38 +94,78 @@ const Navbar = () => {
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
-  }
+  };
+
+// useEffect(() => {
+//   if (user) {
+//     dispatch(getUserCartCount(user.user_id!));
+//   }
+// }, [user]);
+  
+  useEffect(() => {
+    // Check if user is authenticated and user data is available
+    if (!user) {
+      dispatch(fetchUserDetails());
+      
+    }
+    if (user && isAuthenticated) {
+       dispatch(updateCartCount(user?.user_id!));
+    }
+   
+  
+  }, [dispatch, user]);
+
+//   const getCount = async() => {
+//   const count = await dispatch(getUserCartCount(user?.user_id!));
+//   console.log(count.payload.count);
+// }
+
+//   useEffect(() => {
+//     getCount();
+//   }, []);
+
+console.log(count)
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
+    <Box
+      sx={{
+        flexGrow: 1,
+        width: "100%",
+        position: "sticky",
+        top: 0,
+        zIndex: 1000,
+
+        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)", // Add a subtle shadow
+      }}
+    >
       <AppBar
         position="static"
         sx={{
-          bgcolor: `${darkMode ? "#040D12" : "white"}`,
           boxShadow: "none",
+          bgcolor: "whitesmoke",
         }}
       >
         <Toolbar
-          // sx={{
-          //   display: "flex",
-          //   gap: "20px",
-          //   justifyContent: { xs: "flex-end", md: "space-around" },
-          // }}
-
           sx={{
             display: "flex",
-
             alignItems: "center",
-
             justifyContent: isMobile
               ? "space-between"
               : { xs: "flex-end", md: "space-around" },
+            transition: "all 0.3s ease", // Add a transition for smooth animations
           }}
         >
           {isMobile ? null : (
             <Link to="/">
               <Box sx={{ width: { xs: "150px", md: "200px" } }}>
-                <img src={logo} alt="logo" width="100%" />
+                <img
+                  src={Electronik}
+                  alt="logo"
+                  width="100%"
+                  style={{
+                    mixBlendMode: "multiply",
+                  }}
+                />
               </Box>
             </Link>
           )}
@@ -118,15 +174,19 @@ const Navbar = () => {
             <>
               <IconButton
                 edge="start"
-                color={`${darkMode ? "error" : "black"}`}
                 aria-label="menu"
-                sx={{ mr: 2 }}
+                sx={{
+                  mr: 2,
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    transform: "scale(1.1)",
+                  },
+                }}
                 size="large"
                 onClick={handleDrawerToggle}
               >
-                <MenuIcon/>
+                <MenuIcon />
               </IconButton>
-
               <Drawer
                 anchor="left"
                 open={drawerOpen}
@@ -139,7 +199,7 @@ const Navbar = () => {
                   onKeyDown={() => setDrawerOpen(false)}
                 >
                   <Box sx={{ width: { xs: "150px", md: "200px" } }}>
-                    <img src={logo} alt="logo" width="100%" />
+                    <img src="../assets/electronik-high-resolution-logo-black.png" alt="logo" width="100%" />
                   </Box>
                   {links.map(({ id, url, text }) => (
                     <NavLink
@@ -163,7 +223,18 @@ const Navbar = () => {
           )}
 
           {(isTablet || isDesktop || isLaptop || is32InchDesktop) && (
-            <Box sx={{ display: "flex", gap: "50px" }}>
+            <Box
+              sx={{
+                display: "flex",
+                gap: "50px",
+                "& a": {
+                  transition: "all 0.3s ease", // Add transition for link hover effect
+                  "&:hover": {
+                    transform: "scale(1.1)", // Scale up on hover
+                  },
+                },
+              }}
+            >
               {links.map(({ id, url, text }) => (
                 <NavLink
                   to={`${url}`}
@@ -196,21 +267,23 @@ const Navbar = () => {
                 : "30%",
               alignItems: "center",
               gap: isMobile ? "30px" : "15px",
+              "& .MuiSvgIcon-root": {
+                transition: "all 0.3s ease", // Add transition for icon hover effect
+                "&:hover": {
+                  transform: "scale(1.2)", // Scale up on hover
+                },
+              },
             }}
             gap={{ xs: "30px" }}
           >
             <Box
               display="flex"
-              color={`${darkMode ? "white" : "black"}`}
               alignItems="center"
               justifyContent="center"
               gap="15px"
             >
-              <Typography sx={{ display: { xs: "none", sm: "block" } }}>
-                Cart
-              </Typography>
               <Link to="/cart">
-                <Badge badgeContent={cart.length} color="primary">
+                <Badge badgeContent={count} color="primary">
                   <ShoppingCartIcon
                     sx={{ fontSize: { xs: "25px", sm: "35px" } }}
                   />
@@ -230,10 +303,9 @@ const Navbar = () => {
                   {isMobile ? null : (
                     <Chip
                       avatar={
-                        <Avatar>{userName?.slice(0, 1).toUpperCase()}</Avatar>
+                        <Avatar>{user!.name?.slice(0, 1).toUpperCase()}</Avatar>
                       }
-                      label={userName}
-                      sx={{ color: `${darkMode ? "white" : "black"}` }}
+                      label={user?.name?.split(" ").slice(0, -1).join(" ")}
                     />
                   )}
 
@@ -263,15 +335,18 @@ const Navbar = () => {
               )}
             </Box>
             <div
-              style={{ padding: "0px", cursor: "pointer" }}
+              style={
+                {
+                  padding: "0px",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease", // Add transition for dark mode icon hover effect
+                  "&:hover": {
+                    transform: "scale(1.2)", // Scale up on hover
+                  },
+                } as React.CSSProperties
+              }
               onClick={handleToggleDarkMode}
-            >
-              {darkMode ? (
-                <LightModeIcon />
-              ) : (
-                <DarkModeIcon sx={{ color: "black" }} />
-              )}
-            </div>
+            ></div>
           </Box>
         </Toolbar>
       </AppBar>

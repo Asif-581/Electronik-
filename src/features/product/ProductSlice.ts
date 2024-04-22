@@ -1,26 +1,34 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { STATUS } from "../../constants/Status";
-import { productType } from "../../Types/type";
+import { categories, companies, Product, productType } from "../../Types/type";
 import api from "./../../../AxiosInterceptor";
-import { supabase } from "../../Config/supabase";
 
-type Product = {
-  id: string | null;
+const productsRoute = "/api/products";
 
-  name: string;
-  company: string;
-  description: string;
-  image: string | undefined;
-  price: number;
-  category: string | null;
-  quantity: number;
-  stock: number;
-};
+// type Product = {
+//   id: string | null;
+
+//   name: string;
+//   company: string;
+//   description: string;
+//   image: string | undefined;
+//   price: number;
+//   category: string | null;
+//   quantity: number;
+//   stock: number;
+// };
+
+// export type QueryParams = {
+//   category_id?: string,
+//   company_id?:string
+// }
 
 type allProductsType = {
   status: string;
-  products: productType[];
+  products: Product[];
   gridView: boolean;
+  categories: categories[];
+  companies: companies[];
   // searchedProducts: productType[];
 };
 
@@ -28,6 +36,8 @@ const initialState: allProductsType = {
   status: "",
   products: [],
   gridView: true,
+  categories: [],
+  companies: [],
   // searchedProducts:[]
 };
 
@@ -46,30 +56,85 @@ const ProductSlice = createSlice({
       })
       .addCase(
         getAllProducts.fulfilled,
-        (state, action: PayloadAction<productType[]>) => {
-          state.products = action.payload as productType[];
+        (state, action: PayloadAction<Product[]>) => {
+          state.products = action.payload as Product[];
           state.status = STATUS.IDLE;
-        })
+        }
+      )
       .addCase(getAllProducts.rejected, (state) => {
         state.status = STATUS.ERROR;
       })
+      .addCase(fetchCategories.pending, (state) => {
+        state.status = STATUS.LOADING;
+      })
+      .addCase(
+        fetchCategories.fulfilled,
+        (state, action: PayloadAction<categories[]>) => {
+          state.categories = action.payload as categories[];
+          state.status = STATUS.IDLE;
+        }
+      )
+      .addCase(fetchCategories.rejected, (state, action) => {
+        state.status = STATUS.ERROR;
+      })
+      .addCase(fetchCompanies.pending, (state) => {
+        state.status = STATUS.LOADING;
+      })
+      .addCase(
+        fetchCompanies.fulfilled,
+        (state, action: PayloadAction<companies[]>) => {
+          state.companies = action.payload;
+          state.status = STATUS.IDLE;
+        }
+      )
+      .addCase(fetchCompanies.rejected, (state, action) => {
+        state.status = STATUS.ERROR;
+      });
   },
- 
 });
 
-export const getAllProducts = createAsyncThunk("fetch/products", async (productName:string) => {
-  // const response = await api.get<productType[]>(
-  //   `/rest/v1/products?order=created_at.desc`
-  // );
-    const { data, error } = await supabase
-      .from("products")
-      .select()
-    .ilike("name", `%${productName}%`)
-    .order('created_at', { ascending: false });
-    console.log("Search Results:", data);
-    return data as productType[];
- 
-});
+export const fetchCategories = createAsyncThunk<categories[], void>(
+  "categories/fetchCategories",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/api/categories`);
+      const { data } = response;
+
+      return data as categories[];
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const fetchCompanies = createAsyncThunk<companies[], void>(
+  "companies/fetchCompanies",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/api/companies`);
+      const { data } = response;
+      return data;
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const getAllProducts = createAsyncThunk(
+  "fetch/products",
+  async (params?: URLSearchParams) => {
+    const route = params ? `/api/products?${params.toString()}` : productsRoute;
+
+    return (await api.get(route)).data as Product[];
+  }
+);
+
+export const createProduct = createAsyncThunk<void, productType>(
+  "create/products",
+  async (data: productType) => {
+    await api.post(productsRoute, data);
+  }
+);
 
 export const updateProductAsync = createAsyncThunk(
   "products/updateProduct",
@@ -77,16 +142,32 @@ export const updateProductAsync = createAsyncThunk(
     productId,
     updatedProduct,
   }: {
-    productId: string | null;
+    productId: string;
     updatedProduct: Product;
   }) => {
     try {
       const response = await api.put(
-        `/rest/v1/products?id=eq.${productId}`,
+        `/api/products/${productId}`,
         updatedProduct
       );
 
+      if (response.status !== 200) {
+        throw new Error(`Update request failed with status ${response.status}`);
+      }
+
       return response.data as Product;
+    } catch (error) {
+      console.error("Error updating product:", error);
+      throw error;
+    }
+  }
+);
+
+export const deleteProductAsync = createAsyncThunk(
+  "products/deleteProductAsync",
+  async (productId: string | null) => {
+    try {
+      await api.delete(`${productsRoute}/${productId}`);
     } catch (error: any) {
       console.error("Error updating product:", error);
       throw error;
@@ -94,23 +175,8 @@ export const updateProductAsync = createAsyncThunk(
   }
 );
 
-export const deleteProductAsync = createAsyncThunk("products/deleteProductAsync", async (
-  productId:string | null) => {
-  try {
-    await api.delete(`/rest/v1/products?id=eq.${productId}`);
-  }
-  catch (error: any) {
-     console.error("Error updating product:", error);
-     throw error;
-  }
-});
-
-
-
-
 export const { setGridView } = ProductSlice.actions;
 export default ProductSlice.reducer;
 // function action(state: WritableDraft<allProductsType>, action: PayloadAction<any[] | null | undefined, string, { arg: string; requestId: string; requestStatus: "fulfilled"; }, never>): void | allProductsType | WritableDraft<allProductsType> {
 //   throw new Error("Function not implemented.");
 // }
-

@@ -1,12 +1,12 @@
 
-import { User } from "@supabase/supabase-js";
+
 import { apiResponseType } from "../Types/type";
 import { productType } from "../Types/type";
 export const formatPrice = (number:number) => {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
-  }).format(number / 100);
+  }).format(number);
 };
 
 export const formatObjResposeToArray = (obj: apiResponseType) => {
@@ -27,6 +27,3 @@ export const getUniqueValues = (data:productType[] , type:string) => {
   return ["All", ...new Set(unique)];
 };
 
- export const getCurrentLoggedInUser = () => {
- return JSON.parse(localStorage.getItem("user")!) as User;
-}

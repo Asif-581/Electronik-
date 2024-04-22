@@ -1,10 +1,9 @@
 import React from "react";
 import Navigation from "../components/Navigation";
 import { Box, Typography } from "@mui/material";
-import aboutImg from "./../assets/hero-bcg.jpeg";
-import { useAppSelector } from "../Store/hooks";
+// import aboutImg from "./../assets/hero-bcg.jpeg";
 const About = () => {
-    const { darkMode } = useAppSelector((store) => store.theme);
+    
   return (
     <>
       <Navigation title="about" />
@@ -12,10 +11,7 @@ const About = () => {
         display="flex"
         justifyContent="center"
         alignItems="center"
-        sx={{
-          bgcolor: `${darkMode ? "#040D12" : "white"} `,
-          color: `${darkMode ? "white" : "black"}`,
-        }}
+       
       >
         <Box
           sx={{
@@ -30,7 +26,7 @@ const About = () => {
           }}
         >
           <Box sx={{ width: { xs: "350px", sm: "520px" } }}>
-            <img src={aboutImg} alt="aboutImage" width="100%" height="500px" />
+            {/* <img src={aboutImg} alt="aboutImage" width="100%" height="500px" /> */}
           </Box>
 
           <Box sx={{ width: { xs: "350px", sm: "620px" }, marginY : "40px" }}>
